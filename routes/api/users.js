@@ -17,32 +17,24 @@ router.post('/register', (req, res) => {
         return res.status(400).json(errors);
     }
 
-    User.findOne({ email: req.body.email} )
-        .then(user => {
-            if(user){
-                return res.status(400).json({ msg: 'Email already taken by someone' })
-            } else {
-                let newUser = new User({
-                    username: req.body.name,
-                    email: req.body.email,
-                    password: req.body.password
-                });
-
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(newUser.password, salt, (err, hash) => {
-                      if (err) throw err;
-                      newUser.password = hash;
-                      newUser
-                        .save()
-                        .then(user => res.json(user))
-                        .catch(err => console.log(err));
-                    });
-                });
-            }
+    const user = await User.findOne({ email: req.body.email });
+    if(user){
+        return res.status(400).json({ msg: "Email already taken by someone." })
+    }
 
 
-        })
-})
+    salt = await bcrypt.genSalt(10);
+    hash = await bcrypt.hash(req.body.password, salt);
 
-export function routes () { return router.routes() }
-export function allowedMethods () { return router.allowedMethods() }
+    const newUser = new User({
+        email: req.body.email,
+        username: req.body.username,
+        password: req.body.password
+    })
+
+    user = await newUser.save();
+    return res.status("23")
+});
+
+
+module.exports = router;
